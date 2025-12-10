@@ -1,416 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Santa In Your House – Magic Photo Tool</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    :root {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0b1220;
-      color: #e5e7eb;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Santa In Your House 🎅✨</title>
 
+<style>
     body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      align-items: center;
-      justify-content: flex-start;
+        background: #0b1221;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding-bottom: 40px;
     }
 
-    header {
-      text-align: center;
-      padding: 1rem 0.5rem 0.5rem;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.4rem;
-    }
-
-    header p {
-      margin: 0.3rem 0 0;
-      font-size: 0.9rem;
-      color: #9ca3af;
-    }
-
-    main {
-      width: 100%;
-      max-width: 960px;
-      padding: 0.5rem 1rem 1.5rem;
-      box-sizing: border-box;
+    h1 {
+        margin-top: 20px;
+        font-size: 28px;
     }
 
     .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      background: #020617;
-      border-radius: 0.75rem;
-      padding: 0.75rem;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-      margin-bottom: 1rem;
+        margin-top: 20px;
+        background: #111a33;
+        padding: 20px;
+        border-radius: 12px;
+        display: inline-block;
     }
 
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem;
+    #preview-container {
+        margin-top: 25px;
+        position: relative;
+        display: inline-block;
+        max-width: 95%;
     }
 
-    label {
-      font-size: 0.85rem;
-      color: #cbd5f5;
+    #housePhoto, #santaSticker {
+        position: absolute;
+        top: 0;
+        left: 0;
     }
 
-    input[type="file"] {
-      font-size: 0.85rem;
-      color: #e5e7eb;
+    #housePhoto {
+        width: 100%;
     }
 
-    .santa-choices {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
+    #santaSticker {
+        width: 200px;
+        cursor: grab;
     }
 
-    .santa-thumb {
-      width: 60px;
-      height: 60px;
-      border-radius: 0.5rem;
-      border: 2px solid transparent;
-      background: #111827;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      overflow: hidden;
+    .santa-options img {
+        width: 80px;
+        padding: 5px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 10px;
     }
 
-    .santa-thumb img {
-      max-width: 100%;
-      max-height: 100%;
-      pointer-events: none;
-    }
-
-    .santa-thumb.active {
-      border-color: #fbbf24;
-      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.4);
-    }
-
-    .slider-group {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .slider-group span {
-      font-size: 0.75rem;
-      color: #9ca3af;
-      margin-bottom: 0.1rem;
-    }
-
-    input[type="range"] {
-      width: 100%;
+    .santa-options img:hover {
+        border-color: #ffd700;
     }
 
     button {
-      border: none;
-      border-radius: 999px;
-      padding: 0.5rem 1.1rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      background: linear-gradient(135deg, #f97316, #facc15);
-      color: #111827;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      box-shadow: 0 12px 30px rgba(248, 250, 252, 0.2);
+        background: #ffcc00;
+        color: black;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 15px;
+        font-weight: bold;
     }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: default;
-      box-shadow: none;
-    }
-
-    canvas {
-      width: 100%;
-      max-height: 70vh;
-      background: #020617;
-      border-radius: 0.75rem;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.8);
-      touch-action: none;
-    }
-
-    footer {
-      font-size: 0.75rem;
-      color: #6b7280;
-      padding-bottom: 1rem;
-      text-align: center;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <header>
-    <h1>Santa In Your House</h1>
-    <p>Upload a photo of your home, drop Santa in, then download the magic.</p>
-  </header>
 
-  <main>
-    <section class="controls">
-      <div class="row">
-        <label for="bgUpload"><strong>1.</strong> Upload your house photo:</label>
-        <input type="file" id="bgUpload" accept="image/*">
-      </div>
+<h1>Santa In Your House 🎅📸</h1>
 
-      <div class="row">
-        <label><strong>2.</strong> Choose your Santa:</label>
-        <div class="santa-choices">
-          <div class="santa-thumb active" data-index="0">
-            <img src="santa1.png" alt="Santa 1">
-          </div>
-          <div class="santa-thumb" data-index="1">
-            <img src="santa2.png" alt="Santa 2">
-          </div>
-          <div class="santa-thumb" data-index="2">
-            <img src="santa3.png" alt="Santa 3">
-          </div>
-          <div class="santa-thumb" data-index="3">
-            <img src="santa4.png" alt="Santa 4">
-          </div>
-        </div>
-      </div>
+<div class="controls">
+    <h3>1. Upload your house photo:</h3>
+    <input type="file" id="uploadInput" accept="image/*" />
 
-      <div class="row">
-        <div class="slider-group">
-          <span>Santa size</span>
-          <input id="sizeSlider" type="range" min="0.4" max="2" step="0.02" value="1">
-        </div>
-        <div class="slider-group">
-          <span>Santa brightness (opacity)</span>
-          <input id="opacitySlider" type="range" min="0.4" max="1" step="0.02" value="0.95">
-        </div>
-        <div class="slider-group">
-          <span>Santa rotation</span>
-          <input id="rotationSlider" type="range" min="-30" max="30" step="1" value="0">
-        </div>
-      </div>
+    <h3>2. Choose your Santa:</h3>
+    <div class="santa-options">
+        <img src="santa1.png" onclick="selectSanta('santa1.png')">
+        <img src="santa2.png" onclick="selectSanta('santa2.png')">
+    </div>
 
-      <div class="row" style="justify-content: space-between;">
-        <span style="font-size:0.8rem;color:#9ca3af;">Tip: drag Santa around on the picture with your mouse or finger.</span>
-        <button id="downloadBtn" disabled>Download Magic Photo ✨</button>
-      </div>
-    </section>
+    <h3>Santa Size</h3>
+    <input type="range" id="sizeSlider" min="50" max="500" value="200" />
+</div>
 
-    <canvas id="canvas"></canvas>
-  </main>
+<div id="preview-container">
+    <img id="housePhoto" />
+    <img id="santaSticker" draggable="false" />
+</div>
 
-  <footer>
-    Made with love for kids & families. Drop Santa, then enjoy their reactions. 🎅
-  </footer>
+<button onclick="downloadFinal()">Download Magic Photo ✨</button>
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+<script>
+let santa = document.getElementById("santaSticker");
+let house = document.getElementById("housePhoto");
+let sizeSlider = document.getElementById("sizeSlider");
 
-    const bgUpload = document.getElementById('bgUpload');
-    const sizeSlider = document.getElementById('sizeSlider');
-    const opacitySlider = document.getElementById('opacitySlider');
-    const rotationSlider = document.getElementById('rotationSlider');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const santaThumbs = document.querySelectorAll('.santa-thumb');
-
-    // Preload Santa images
-    const santaSources = ['santa1.png', 'santa2.png', 'santa3.png', 'santa4.png'];
-    const santas = santaSources.map(src => {
-      const img = new Image();
-      img.src = src;
-      img.onload = draw;
-      return img;
-    });
-
-    let bgImage = null;
-    let santaIndex = 0;
-
-    const overlay = {
-      x: 0,
-      y: 0,
-      scale: 1,
-      opacity: 0.95,
-      rotation: 0
+// Upload background photo
+document.getElementById("uploadInput").addEventListener("change", function(e) {
+    let file = e.target.files[0];
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        house.src = event.target.result;
     };
+    reader.readAsDataURL(file);
+});
 
-    let isDragging = false;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
+// Select Santa
+function selectSanta(name) {
+    santa.src = name;
+}
 
-    function fitCanvasToBackground() {
-      if (!bgImage) return;
-      const maxWidth = 960;
-      const maxHeight = 700;
+// Resize Santa
+sizeSlider.oninput = function () {
+    santa.style.width = this.value + "px";
+};
 
-      let width = bgImage.naturalWidth || bgImage.width;
-      let height = bgImage.naturalHeight || bgImage.height;
+// Drag Santa
+let isDown = false;
+let offsetX, offsetY;
 
-      const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
-      width = width * ratio;
-      height = height * ratio;
+santa.addEventListener("mousedown", function(e) {
+    isDown = true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    santa.style.cursor = "grabbing";
+});
 
-      canvas.width = width;
-      canvas.height = height;
+document.addEventListener("mouseup", function() { isDown = false; santa.style.cursor="grab"; });
 
-      // place Santa roughly in bottom third
-      overlay.x = canvas.width * 0.5;
-      overlay.y = canvas.height * 0.75;
-    }
+document.addEventListener("mousemove", function(e) {
+    if (!isDown) return;
+    let rect = document.getElementById("preview-container").getBoundingClientRect();
+    santa.style.left = (e.clientX - rect.left - offsetX) + "px";
+    santa.style.top = (e.clientY - rect.top - offsetY) + "px";
+});
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (bgImage) {
-        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-      } else {
-        // dark background when no image yet
-        ctx.fillStyle = '#020617';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      const santa = santas[santaIndex];
-      if (!santa.complete) return;
-
-      const baseWidth = santa.naturalWidth || santa.width;
-      const baseHeight = santa.naturalHeight || santa.height;
-
-      const scale = overlay.scale;
-      const w = baseWidth * scale;
-      const h = baseHeight * scale;
-
-      ctx.save();
-      ctx.translate(overlay.x, overlay.y);
-      ctx.rotate((overlay.rotation * Math.PI) / 180);
-      ctx.globalAlpha = overlay.opacity;
-      ctx.drawImage(santa, -w / 2, -h, w, h); // anchor at feet
-      ctx.restore();
-    }
-
-    bgUpload.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        bgImage = new Image();
-        bgImage.onload = () => {
-          fitCanvasToBackground();
-          downloadBtn.disabled = false;
-          draw();
-        };
-        bgImage.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
+// Download final image
+function downloadFinal() {
+    html2canvas(document.getElementById("preview-container")).then(canvas => {
+        let link = document.createElement("a");
+        link.download = "SantaMagicPhoto.png";
+        link.href = canvas.toDataURL();
+        link.click();
     });
+}
+</script>
 
-    santaThumbs.forEach(thumb => {
-      thumb.addEventListener('click', () => {
-        santaThumbs.forEach(t => t.classList.remove('active'));
-        thumb.classList.add('active');
-        santaIndex = parseInt(thumb.getAttribute('data-index'), 10) || 0;
-        draw();
-      });
-    });
+<!-- Load html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    sizeSlider.addEventListener('input', () => {
-      overlay.scale = parseFloat(sizeSlider.value);
-      draw();
-    });
-
-    opacitySlider.addEventListener('input', () => {
-      overlay.opacity = parseFloat(opacitySlider.value);
-      draw();
-    });
-
-    rotationSlider.addEventListener('input', () => {
-      overlay.rotation = parseFloat(rotationSlider.value);
-      draw();
-    });
-
-    function getPointerPos(evt) {
-      const rect = canvas.getBoundingClientRect();
-      const touch = evt.touches ? evt.touches[0] : evt;
-      return {
-        x: (touch.clientX - rect.left) * (canvas.width / rect.width),
-        y: (touch.clientY - rect.top) * (canvas.height / rect.height)
-      };
-    }
-
-    function isOnSanta(pos) {
-      const santa = santas[santaIndex];
-      const baseWidth = santa.naturalWidth || santa.width;
-      const baseHeight = santa.naturalHeight || santa.height;
-      const w = baseWidth * overlay.scale;
-      const h = baseHeight * overlay.scale;
-
-      // reverse-transform the click point
-      const dx = pos.x - overlay.x;
-      const dy = pos.y - overlay.y;
-      const angle = (-overlay.rotation * Math.PI) / 180;
-      const rx = dx * Math.cos(angle) - dy * Math.sin(angle);
-      const ry = dx * Math.sin(angle) + dy * Math.cos(angle);
-
-      return rx > -w / 2 && rx < w / 2 && ry > -h && ry < 0;
-    }
-
-    function startDrag(evt) {
-      evt.preventDefault();
-      const pos = getPointerPos(evt);
-      if (isOnSanta(pos)) {
-        isDragging = true;
-        dragOffsetX = pos.x - overlay.x;
-        dragOffsetY = pos.y - overlay.y;
-      }
-    }
-
-    function moveDrag(evt) {
-      if (!isDragging) return;
-      evt.preventDefault();
-      const pos = getPointerPos(evt);
-      overlay.x = pos.x - dragOffsetX;
-      overlay.y = pos.y - dragOffsetY;
-      draw();
-    }
-
-    function endDrag(evt) {
-      if (!isDragging) return;
-      evt.preventDefault();
-      isDragging = false;
-    }
-
-    canvas.addEventListener('mousedown', startDrag);
-    canvas.addEventListener('mousemove', moveDrag);
-    window.addEventListener('mouseup', endDrag);
-
-    canvas.addEventListener('touchstart', startDrag, { passive: false });
-    canvas.addEventListener('touchmove', moveDrag, { passive: false });
-    window.addEventListener('touchend', endDrag);
-
-    downloadBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'santa-in-your-house.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
-
-    // initial canvas background
-    canvas.width = 800;
-    canvas.height = 500;
-    draw();
-  </script>
 </body>
 </html>
