@@ -1,199 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
 <title>Santa In Your House 🎅📸</title>
-
-<!-- HEIC conversion library -->
-<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
-
 <style>
     body {
-        background: #0b1221;
+        background-color: #071123;
         color: white;
         font-family: Arial, sans-serif;
         text-align: center;
-        padding-bottom: 40px;
+        margin: 0;
+        padding: 0;
     }
 
-    h1 {
-        margin-top: 20px;
-        font-size: 28px;
-    }
-
-    .controls {
-        margin-top: 20px;
-        background: #111a33;
-        padding: 20px;
+    #appBox {
+        background: #0d1a33;
+        padding: 25px;
+        width: 350px;
+        margin: 40px auto;
         border-radius: 12px;
-        display: inline-block;
+        box-shadow: 0 0 15px rgba(255,255,255,0.1);
     }
 
-    #preview-container {
-        margin-top: 25px;
-        position: relative;
-        display: inline-block;
-        max-width: 95%;
-        background: transparent;
+    #previewCanvas {
+        margin-top: 20px;
+        max-width: 90%;
+        border-radius: 10px;
     }
 
-    #housePhoto {
-        width: 100%;
-        display: block;
-    }
-
-    #santaSticker {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        width: 200px;
-        cursor: grab;
-        pointer-events: auto;
-    }
-
-    .santa-options img {
-        width: 80px;
-        padding: 5px;
+    .santaOption {
+        width: 90px;
         cursor: pointer;
+        margin: 10px;
+        border-radius: 10px;
         border: 2px solid transparent;
-        border-radius: 10px;
     }
 
-    .santa-options img:hover {
-        border-color: #ffd700;
-    }
-
-    button {
-        background: #ffcc00;
-        color: black;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 10px;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 15px;
-        font-weight: bold;
+    .santaOption:hover {
+        border-color: gold;
     }
 </style>
 </head>
 <body>
 
-<h1>Santa In Your House 🎅📸</h1>
+<h1>Santa In Your House 🎅✨</h1>
 
-<div class="controls">
+<div id="appBox">
     <h3>1. Upload your house photo:</h3>
-    <input type="file" id="uploadInput" accept="image/*" />
+    <input type="file" id="houseUpload" accept="image/jpeg,image/png">
 
     <h3>2. Choose your Santa:</h3>
-    <div class="santa-options">
-        <img src="santa1.png" onclick="selectSanta('santa1.png')">
-        <img src="santa2.png" onclick="selectSanta('santa2.png')">
-    </div>
+    <img src="santa3.png" class="santaOption" onclick="selectSanta('santa3.png')">
+    <img src="santa4.png" class="santaOption" onclick="selectSanta('santa4.png')">
 
     <h3>Santa Size</h3>
-    <input type="range" id="sizeSlider" min="50" max="500" value="200" />
+    <input type="range" id="santaSize" min="40" max="200" value="100">
+
+    <br><br>
+    <button onclick="downloadImage()" 
+            style="background: gold; padding: 12px 20px; border-radius: 8px; border: none; font-size: 16px;">
+        Download Magic Photo ✨
+    </button>
 </div>
 
-<div id="preview-container">
-    <img id="housePhoto" />
-    <img id="santaSticker" draggable="false" />
-</div>
-
-<button onclick="downloadFinal()">Download Magic Photo ✨</button>
+<canvas id="previewCanvas"></canvas>
 
 <script>
-let santa = document.getElementById("santaSticker");
-let house = document.getElementById("housePhoto");
-let sizeSlider = document.getElementById("sizeSlider");
+let houseImg = null;
+let santaImg = new Image();
 
-// -------------------------------
-// HEIC SUPPORT + Image Upload
-// -------------------------------
-document.getElementById("uploadInput").addEventListener("change", async function(e) {
-    let file = e.target.files[0];
+// Force only JPG or PNG uploads
+document.getElementById("houseUpload").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+
     if (!file) return;
 
-    // Detect HEIC and convert automatically
-    if (file.type === "image/heic" || file.name.endsWith(".heic") || file.name.endsWith(".HEIC")) {
-        try {
-            const convertedBlob = await heic2any({
-                blob: file,
-                toType: "image/jpeg",
-                quality: 0.9
-            });
-            file = new File([convertedBlob], "converted.jpg", { type: "image/jpeg" });
-        } catch (error) {
-            alert("HEIC conversion failed. Try again or use JPG.");
-            console.error(error);
-            return;
-        }
+    if (!file.type.match("image/jpeg") && !file.type.match("image/png")) {
+        alert("❌ Please upload a JPG or PNG file. HEIC is not supported.");
+        e.target.value = "";
+        return;
     }
 
-    // Load image into preview
-    let reader = new FileReader();
-    reader.onload = function(event) {
-        house.src = event.target.result;
+    const reader = new FileReader();
+    reader.onload = function () {
+        houseImg = new Image();
+        houseImg.onload = drawCanvas;
+        houseImg.src = reader.result;
     };
     reader.readAsDataURL(file);
 });
 
-// -------------------------------
 // Select Santa
-// -------------------------------
-function selectSanta(name) {
-    santa.src = name;
+function selectSanta(path) {
+    santaImg = new Image();
+    santaImg.onload = drawCanvas;
+    santaImg.src = path;
 }
 
-// Resize Santa
-sizeSlider.oninput = function () {
-    santa.style.width = this.value + "px";
-};
+// Draw everything on canvas
+function drawCanvas() {
+    if (!houseImg) return;
 
-// -------------------------------
-// Drag Santa
-// -------------------------------
-let isDown = false;
-let offsetX = 0, offsetY = 0;
+    const canvas = document.getElementById("previewCanvas");
+    const ctx = canvas.getContext("2d");
 
-santa.addEventListener("mousedown", function(e) {
-    isDown = true;
-    offsetX = e.offsetX;
-    offsetY = e.offsetY;
-    santa.style.cursor = "grabbing";
-});
+    // AUTO-RESIZE IMAGE (max width 800)
+    const maxWidth = 800;
+    const scale = Math.min(maxWidth / houseImg.width, 1);
 
-document.addEventListener("mouseup", function() {
-    isDown = false;
-    santa.style.cursor = "grab";
-});
+    canvas.width = houseImg.width * scale;
+    canvas.height = houseImg.height * scale;
 
-document.addEventListener("mousemove", function(e) {
-    if (!isDown) return;
+    ctx.drawImage(houseImg, 0, 0, canvas.width, canvas.height);
 
-    let rect = document.getElementById("preview-container").getBoundingClientRect();
-    santa.style.left = (e.clientX - rect.left - offsetX) + "px";
-    santa.style.top = (e.clientY - rect.top - offsetY) + "px";
-});
+    if (santaImg.src) {
+        const santaScale = document.getElementById("santaSize").value / 100;
+        const santaWidth = santaImg.width * santaScale;
+        const santaHeight = santaImg.height * santaScale;
 
-// -------------------------------
-// DOWNLOAD FINAL
-// -------------------------------
-function downloadFinal() {
-    html2canvas(document.getElementById("preview-container"), {
-        useCORS: true,
-        backgroundColor: null
-    }).then(canvas => {
-        let link = document.createElement("a");
-        link.download = "SantaMagicPhoto.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    });
+        // Draw Santa at bottom-left
+        ctx.drawImage(santaImg, 20, canvas.height - santaHeight - 20, santaWidth, santaHeight);
+    }
+}
+
+// Download image
+function downloadImage() {
+    const canvas = document.getElementById("previewCanvas");
+    const link = document.createElement("a");
+    link.download = "SantaMagicPhoto.png";
+    link.href = canvas.toDataURL();
+    link.click();
 }
 </script>
-
-<!-- html2canvas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </body>
 </html>
