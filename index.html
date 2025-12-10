@@ -1,152 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Santa In Your House 🎅✨</title>
+
 <style>
     body {
         margin: 0;
+        background: #04152d;
         font-family: Arial, sans-serif;
-        background: #071225;
         color: white;
         text-align: center;
     }
 
     .container {
-        margin-top: 30px;
-        background: rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.05);
         padding: 30px;
+        margin: 40px auto;
         width: 380px;
-        margin-left: auto;
-        margin-right: auto;
-        border-radius: 18px;
-        box-shadow: 0 0 20px rgba(255,255,255,0.15);
+        border-radius: 20px;
+        box-shadow: 0 0 25px rgba(255,255,255,0.08);
     }
 
     .santa-option {
-        width: 140px;
-        height: 140px;
-        object-fit: contain;
-        cursor: pointer;
+        width: 120px;
+        height: 120px;
         margin: 10px;
+        cursor: pointer;
+        border-radius: 12px;
+        background-color: rgba(255,255,255,0.1);
+        padding: 5px;
+    }
+
+    .santa-option.selected {
+        outline: 3px solid gold;
     }
 
     #resultCanvas {
         margin-top: 20px;
-        max-width: 95%;
-        border-radius: 12px;
-    }
-
-    .button {
-        background: #FFD21C;
-        color: black;
-        padding: 14px 28px;
-        font-size: 18px;
+        max-width: 100%;
         border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        margin-top: 20px;
-        font-weight: bold;
     }
-</style>
-</head>
 
+    button {
+        background: #ffcc00;
+        color: black;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        cursor: pointer;
+        margin-top: 15px;
+    }
+
+    button:hover {
+        background: #ffdd33;
+    }
+
+</style>
+
+</head>
 <body>
-<h1>Santa In Your House 🤶✨📸</h1>
+
+<h1>Santa In Your House 🎅✨</h1>
 
 <div class="container">
     <h3>1. Upload your house photo:</h3>
-    <input id="houseInput" type="file" accept="image/png, image/jpeg">
-    <p style="color:#FFD21C">Only JPG or PNG allowed. HEIC is not supported.</p>
+    <input type="file" id="upload" accept="image/png, image/jpeg" />
+    <p style="color:#ffcc66">Only JPG or PNG allowed. HEIC is not supported.</p>
 
     <h3>2. Choose your Santa:</h3>
-    <img src="santa1.png" class="santa-option" onclick="selectSanta('santa1.png')">
-    <img src="santa2.png" class="santa-option" onclick="selectSanta('santa2.png')">
+
+    <img src="santa1.png" class="santa-option" id="santa1">
+    <img src="santa2.png" class="santa-option" id="santa2">
 
     <h3>Santa Size</h3>
-    <input id="sizeSlider" type="range" min="20" max="140" value="80">
+    <input type="range" id="sizeSlider" min="30" max="150" value="80" />
+
+    <button onclick="downloadImage()">Download Magic Photo ✨</button>
 </div>
 
 <canvas id="resultCanvas"></canvas>
 
-<br>
-<button class="button" onclick="downloadImage()">Download Magic Photo ✨</button>
-
 <script>
-let selectedSanta = null;
 let uploadedImage = null;
+let selectedSanta = null;
 
-function selectSanta(file) {
-    selectedSanta = file;
-    drawCanvas(); // ⭐ Instantly show Santa
-}
-
-document.getElementById("houseInput").addEventListener("change", function(e) {
+// ---------------- IMAGE UPLOAD ----------------
+document.getElementById("upload").addEventListener("change", function (e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.includes("png") && !file.type.includes("jpeg")) {
+    if (!file.type.includes("jpeg") && !file.type.includes("png")) {
         alert("Please upload JPG or PNG only. HEIC is not supported.");
         return;
     }
 
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         uploadedImage = new Image();
-        uploadedImage.onload = drawCanvas;
+        uploadedImage.onload = function () {
+            drawCanvas();
+        };
         uploadedImage.src = event.target.result;
     };
     reader.readAsDataURL(file);
 });
 
-document.getElementById("sizeSlider").addEventListener("input", drawCanvas);
+// ---------------- SELECT SANTA ----------------
+document.querySelectorAll(".santa-option").forEach(img => {
+    img.addEventListener("click", () => {
+        document.querySelectorAll(".santa-option").forEach(i => i.classList.remove("selected"));
+        img.classList.add("selected");
+        selectedSanta = img.src;
+        drawCanvas();
+    });
+});
 
+// ---------------- CORE DRAWING LOGIC ----------------
 function drawCanvas() {
     if (!uploadedImage) return;
 
     const canvas = document.getElementById("resultCanvas");
     const ctx = canvas.getContext("2d");
 
-    const MAX_WIDTH = 1400;
-    let width = uploadedImage.width;
-    let height = uploadedImage.height;
+    const house = new Image();
+    house.onload = function () {
 
-    if (width > MAX_WIDTH) {
-        height = height * (MAX_WIDTH / width);
-        width = MAX_WIDTH;
-    }
+        const MAX_WIDTH = 1400;
+        let width = house.width;
+        let height = house.height;
 
-    canvas.width = width;
-    canvas.height = height;
+        // Resize house image
+        if (width > MAX_WIDTH) {
+            height = height * (MAX_WIDTH / width);
+            width = MAX_WIDTH;
+        }
 
-    ctx.drawImage(uploadedImage, 0, 0, width, height);
+        canvas.width = width;
+        canvas.height = height;
 
-    if (selectedSanta) {
-        const santa = new Image();
-        santa.onload = function() {
-            const scale = document.getElementById("sizeSlider").value / 100;
-            const sw = santa.width * scale;
-            const sh = santa.height * scale;
+        // Draw background house
+        ctx.drawImage(house, 0, 0, width, height);
 
-            ctx.drawImage(santa, 20, height - sh - 20, sw, sh);
-        };
-        santa.src = selectedSanta;
-    }
+        // Draw Santa AFTER canvas is fully ready
+        if (selectedSanta) {
+            const santa = new Image();
+            santa.onload = function () {
+                const scale = document.getElementById("sizeSlider").value / 100;
+                const sw = santa.width * scale;
+                const sh = santa.height * scale;
+
+                // Draw Santa at bottom-left
+                ctx.drawImage(santa, 30, height - sh - 30, sw, sh);
+            };
+            santa.src = selectedSanta + "?cache=" + Date.now();
+        }
+    };
+
+    house.src = uploadedImage.src;
 }
 
+// Re-draw Santa when size slider moves
+document.getElementById("sizeSlider").addEventListener("input", drawCanvas);
+
+// ---------------- DOWNLOAD ----------------
 function downloadImage() {
-    if (!uploadedImage) {
-        alert("Upload a photo first!");
-        return;
-    }
-
-    drawCanvas();
-
+    const canvas = document.getElementById("resultCanvas");
     const link = document.createElement("a");
     link.download = "SantaMagicPhoto.png";
-    link.href = document.getElementById("resultCanvas").toDataURL();
+    link.href = canvas.toDataURL();
     link.click();
 }
+
 </script>
 
 </body>
